@@ -26,9 +26,9 @@
   }
 
 body{
-    @apply dark:bg-[var(--dark-background)] bg-[var(--background)] h-full w-full overflow-hidden;
+    @apply dark:bg-[var(--dark-background)] bg-[var(--background)] h-full w-full;
 }
 
 html{
-    @apply h-full;
+    @apply h-full w-full;
 }

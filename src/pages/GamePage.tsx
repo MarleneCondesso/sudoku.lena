@@ -283,8 +283,8 @@ const GamePage = () => {
     };
 
     return (
-        <div className="flex flex-col p-7 dark:bg-[var(--dark-background)] justify-between items-center">
-            <div className="lg:w-96">
+        <div className="flex flex-col w-full p-7 dark:bg-[var(--dark-background)] justify-between items-center">
+            <div className="lg:w-96 ">
                 <div className="flex flex-row justify-between dark:text-teal-700">
                     <button onClick={() => redirectToHomePage()}>
                         <MdOutlineArrowBackIos size={25} />
@@ -333,7 +333,7 @@ const GamePage = () => {
                                     <tr
                                         key={row}
                                         id="tableRow"
-                                        className={`${(row + 1) % 3 === 0 && row + 1 !== 9 ? "mb-3" : ""
+                                        className={`${(row + 1) % 3 === 0 && row + 1 !== 9 ? "mb-1" : ""
                                             } flex-row flex`}
                                     >
                                         {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((col) => {
@@ -341,18 +341,18 @@ const GamePage = () => {
                                                 <td
                                                     key={col}
                                                     id="tableCol"
-                                                    className={`${(col + 1) % 3 === 0 && col + 1 !== 9 ? "mr-2" : ""
+                                                    className={`${(col + 1) % 3 === 0 && col + 1 !== 9 ? "mr-1" : ""
                                                         } flex flex-col items-center`}
                                                 >
                                                     <input
                                                         id="input"
                                                         type="number"
-                                                        className={`h-10 
+                                                        className={`h-8 
                                                     //dark:focus:border-teal-700 
                                                     //dark:focus:border-4
                                                     //focus:border-slate-500
                                                     //focus:border-4
-                                                    w-10 
+                                                    w-8 
                                                     flex 
                                                     text-center
                                                     shadow-xl
