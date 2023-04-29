@@ -1,0 +1,34 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+
+:root{
+    --dark-background: #2C3333;
+    --dark-background-components: #115e59;
+    --dark-text-color: #80ffc3;
+    --dark-text-color-light: white;
+
+    --background: #F0EBE3;
+    --background-components: #f0c98b;
+    --text-color: #3b414b;
+    --text-color-light: white;
+}
+
+@keyframes slideToUp {
+    from {bottom: 0px;}
+    to {top: 800px;}
+  }
+@keyframes slideToDown {
+    from {top: 0px;}
+    to {bottom: 400px;}
+  }
+
+body{
+    @apply dark:bg-[var(--dark-background)] bg-[var(--background)] h-full w-full overflow-hidden;
+}
+
+html{
+    @apply h-full;
+}
