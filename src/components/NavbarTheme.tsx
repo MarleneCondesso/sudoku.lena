@@ -46,6 +46,7 @@ const NavbarTheme: FC<NavbarThemeProps> = ({onGameScene}) => {
         <div>
             <div className={`
                 flex
+                
                 ${!onGameScene ? 'fixed' : ''}
                 right-3
                 float-right

@@ -309,7 +309,7 @@ const GamePage = () => {
             <div className="lg:w-full lg:h-full lg:p-7 gap-4 flex flex-col pt-10">
                 <div className="flex flex-row justify-between dark:text-teal-700">
                     <button onClick={() => redirectToHomePage()}>
-                        <MdOutlineArrowBackIos size={25} />
+                        <MdOutlineArrowBackIos size={30}/>
                     </button>
 
                     <h1 className="text-xl lg:text-4xl font-semibold dark:text-white">Sudoku.lena</h1>
@@ -383,6 +383,10 @@ const GamePage = () => {
                                                         className={`h-8 
                                                     cursor-pointer
                                                     w-8 
+                                                    lg:w-16
+                                                    lg:h-16
+                                                    md:h-16
+                                                    md:w-16
                                                     flex 
                                                     text-center
                                                     shadow-xl
