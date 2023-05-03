@@ -48,6 +48,7 @@ const NavbarTheme: FC<NavbarThemeProps> = ({onGameScene}) => {
                 flex
                 ${!onGameScene ? 'fixed' : ''}
                 right-3
+                float-right
                 bg-gray-400
                 opacity-60
                 top-5

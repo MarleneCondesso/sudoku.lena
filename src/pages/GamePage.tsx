@@ -1,17 +1,21 @@
 import { MdOutlineArrowBackIos } from "react-icons/md";
 import { BsPalette } from "react-icons/bs";
-import { FiSettings } from "react-icons/fi";
+//import { FiSettings } from "react-icons/fi";
 import { AiOutlineUndo } from "react-icons/ai";
 import { TfiEraser } from "react-icons/tfi";
-import { BsFillPencilFill } from "react-icons/bs";
-import { MdOutlineTipsAndUpdates } from "react-icons/md";
+//import { BsFillPencilFill } from "react-icons/bs";
+//import { MdOutlineTipsAndUpdates } from "react-icons/md";
+import { BiPauseCircle } from 'react-icons/bi';
+//import { VscPlayCircle } from 'react-icons/vsc'
 import { useCallback, useEffect, useState } from "react";
-import { SudokuGenerate } from "./SudokuGenerate";
-import { CONSTANT } from "./HomePage";
-import { useNavigate, useParams } from "react-router-dom";
+import { SudokuGenerate } from "../libs/SudokuGenerate";
+import { useParams } from "react-router-dom";
 import NavbarTheme from "../components/NavbarTheme";
-import FinishGamePage from "./FinishGamePage";
-import { debug, error } from "console";
+import { Cookie } from "../libs/Cookie";
+import { useNavigate } from "react-router-dom";
+import { TimeFormatter } from "../libs/TimeFormatter";
+import { CONSTANT_GAME, CONSTANT_TYPE_BORDER } from "../libs/Modules";
+
 
 export interface Sudoku {
     origin: number[][];
@@ -27,32 +31,36 @@ export interface SelectedCell {
 
 export interface Game {
     level: any;
-    sudoku: any;
-    sudokuOrigin: any;
-    time: any;
+    original: any;
     solution: any;
+    answer: any;
+    time: any;
+    errors: any;
 }
 
-let sudokuGenerate = new SudokuGenerate();
+
 
 const GamePage = () => {
-    let params = useParams();
-    let level = params?.level?.toString() || "";
-    let type = params.type?.toString() || "";
-    let index_level = parseInt(level);
-    let typeConvert = parseInt(type);
+
+    var interval;
+
+    const params = useParams();
+    const level = params?.level?.toString() || "";
+    const index_level = parseInt(level);
+
 
     const navigate = useNavigate();
+    const cookie = new Cookie();
+    const sudokuGenerate = new SudokuGenerate();
+    const formatter = new TimeFormatter();
 
     const [showMenuTheme, setShowMenuTheme] = useState(false);
     const [isSelectedCell, setIsSelectedCell] = useState(false);
-    const [showFinishGamePage, setShowFinishGamePage] = useState(false);
 
     const [timeArray, setTimeArray] = useState<Array<number>>([]);
-    const [pauseTimer, setPauseTimer] = useState(false);
-    const [seconds, setSeconds] = useState(0);
+    const [seconds, setSeconds] = useState(-1);
 
-    const sudokuCreated = getDeepCopy(sudokuGenerate.sudokuGen(CONSTANT.LEVEL[index_level]));
+    const sudokuCreated = getDeepCopy(sudokuGenerate.sudokuGen(CONSTANT_GAME.LEVEL[index_level]));
 
     const sudokuBase = getDeepCopy(sudokuCreated.question);
     const [sudokuSolution, setSudokuSolution] = useState(getDeepCopy(sudokuCreated.solution));
@@ -61,42 +69,21 @@ const GamePage = () => {
     const [sudokuAnswer, setSudokuAnswer] = useState(sudokuBase);
 
 
-
+    const [errors, setErrors] = useState(0);
 
     const toggleShowMenuTheme = useCallback(() => {
         setShowMenuTheme((current) => !current);
     }, []);
 
-    function getDeepCopy(arr: any) {
-        return JSON.parse(JSON.stringify(arr));
+    const toggleErrors = useCallback(() => {
+        setErrors((current) => current + 1);
+    }, []);
+
+
+    function getDeepCopy(value: any) {
+        return JSON.parse(JSON.stringify(value));
     }
-
-    //CHECK ROW BY ROW
-    const equals = (gridRow: any, sudokuSolutionRow: any) =>
-        gridRow.length === sudokuSolutionRow.length &&
-        gridRow.every((value: any, i: any) => value === sudokuSolutionRow[i]);
-
-    const checkSudoku = (grid: any) => {
-        var res = false;
-        //debugger
-        // GRID -> ROWS -> ROW -> VALUE
-        // EQUALS
-        // SOLUTION -> SOLUTION[ROWS] -> SOLUTION[INDEXROW] -> VALUE
-        try {
-            grid.forEach((rows: Array<number>, i: any) => {
-                res = rows.every(
-                    (value: any, iRow: any) => value === sudokuSolution[i][iRow]
-                );
-                if (!res) throw Error;
-            });
-        } catch (error) {
-            return res;
-        }
-
-        return res;
-    };
-
-    const handler = (e: any, row: number, col: number, num: number) => {
+    function handler(e: any, row: number, col: number, num: number){
         setIsSelectedCell(true);
         var value = 0,
             grid = getDeepCopy(sudokuAnswer),
@@ -119,127 +106,131 @@ const GamePage = () => {
         if (value === -1 || (value >= 1 && value <= 9)) {
             grid[row][col] = value;
         }
+
         setSudokuAnswer(grid);
         globalThis.selectedCell = selectedCell;
-        saveGame();
-
-
-        // var gameInformation = encodeURI(globalThis.game);
-        // document.cookie = "game=" + gameInformation;
-
+        saveGameCookie();
 
         if (checkSudoku(grid)) {
-            console.log();
-            saveGame();
-            navigate("/game-page/finish");
+            saveGameCookie();
+            const finish = 'win';
+            navigate(`/game-page/${finish}`);
         }
+
     };
-
-    const changeTheBorderOfInput = (
-        inputs: any,
-        cell: any,
-        value: any,
-        row: any,
-        col: any
-    ) => {
-        // Changes style according to user number interaction
-        for (var i = 0; i < inputs.length; i++) {
-            if (inputs[i] === cell.target) {
-                if (sudokuSolution[row][col] !== value && value !== -1) {
-                    clearTheBorderInput(cell.target, 0);
-                    addTheBorderInput(cell.target, 1);
-                } else {
-                    clearTheBorderInput(cell.target, 1);
-                    addTheBorderInput(cell.target, 0);
-                }
-            } else {
-                clearTheBorderInput(inputs[i], 0);
-            }
-        }
-    };
-    const getTime = (time: any) => {
-        function pad(val: any) {
-            return val > 9 ? val : "0" + val;
-        }
-        setInterval(function () {
-            if (!pauseTimer) {
-                let hours = pad(parseInt((time / 3600).toString(), 10));
-                let minutes = pad(parseInt((time / 60).toString(), 10) % 60);
-                let seconds = pad(++time % 60);
-
-                let array = [hours, minutes, seconds];
-
-                setTimeArray(array);
-                setSeconds(time);
-            }
-        }, 1000);
-    };
-
-    const saveGame = () => {
-        setPauseTimer(true);
+    const saveGameCookie = () => {
         const game: Game = {
-            level: index_level,
-            sudoku: sudokuAnswer,
-            sudokuOrigin: initialSudoku,
-            time: seconds,
+            level: level,
             solution: sudokuSolution,
-        };
+            time: seconds,
+            answer: sudokuAnswer,
+            original: initialSudoku,
+            errors: errors
+        }
 
-        globalThis.game = game;
+        const gameJsonString = JSON.stringify(game);
+        cookie.setCookie('game', gameJsonString, 7);
+
+    }
+
+    function checkSudoku(grid: any){
+        var res = false;
+        //debugger
+        // GRID -> ROWS -> ROW -> VALUE
+        // EQUALS
+        // SOLUTION -> SOLUTION[ROWS] -> SOLUTION[INDEXROW] -> VALUE
+        try {
+            grid.forEach((rows: Array<number>, i: any) => {
+                res = rows.every(
+                    (value: any, iRow: any) => value === sudokuSolution[i][iRow]
+                );
+                if (!res) throw Error;
+            });
+        } catch (error) {
+            return res;
+        }
+        return res;
     };
-
-    const redirectToHomePage = () => {
-        saveGame();
-        navigate("/");
-    };
-
-    const clearSudoku = () => {
+    function clearSudoku(){
         setSudokuAnswer(initialSudoku);
-        var inputs = document.getElementsByTagName("input");
+        const inputs = document.getElementsByTagName("input");
         for (let i = 0; i < inputs.length; i++) {
             clearTheBorderInput(inputs[i], 2);
         }
     };
 
-    const openGame = () => {
-        if (typeConvert === 1) {
-            setSudokuAnswer(globalThis.game?.sudoku);
-            setInitialSudoku(globalThis.game?.sudokuOrigin);
-            getTime(globalThis.game?.time);
-            setSudokuSolution(globalThis.game?.solution);
+    function changeTheBorderOfInput(
+        inputs: any,
+        cell: any,
+        value: any,
+        row: any,
+        col: any
+    ){
+        // Changes style according to user number interaction
+        for (const element of inputs) {
+            if (element === cell.target) {
+                debugger
+                if (sudokuSolution[row][col] !== value && value !== -1) {
+                    clearTheBorderInput(cell.target, CONSTANT_TYPE_BORDER.normalBorder);
+                    addTheBorderInput(cell.target, CONSTANT_TYPE_BORDER.errorBorder);
+                } else {
+                    clearTheBorderInput(cell.target, CONSTANT_TYPE_BORDER.errorBorder);
+                    addTheBorderInput(cell.target, CONSTANT_TYPE_BORDER.normalBorder);
+                }
+            } else {
+                clearTheBorderInput(element, CONSTANT_TYPE_BORDER.normalBorder);
+            }
+        }
+    };
+    // Methods to change the border of inputs cells
+    function clearTheBorderInput(cell: any, type: any){
+        if (type === 0) {
+            cell.classList.remove("dark:focus:border-teal-700");
+            cell.classList.remove("dark:focus:border-4");
+            cell.classList.remove("focus:border-slate-500");
+            cell.classList.remove("focus:border-4");
+            cell.classList.remove("dark:border-teal-700");
+            cell.classList.remove("dark:border-4");
+            cell.classList.remove("border-[var(--background-components)]");
+            cell.classList.remove("border-4");
+        } else if (type === 1) {
+            cell.classList.remove("border-red-600");
+            cell.classList.remove("border-4");
         } else {
-            getTime(-1);
+            cell.classList.remove("dark:focus:border-teal-700");
+            cell.classList.remove("dark:focus:border-4");
+            cell.classList.remove("dark:border-teal-700");
+            cell.classList.remove("dark:border-4");
+            cell.classList.remove("focus:border-slate-500");
+            cell.classList.remove("focus:border-4");
+            cell.classList.remove("border-[var(--background-components)]");
+            cell.classList.remove("border-4");
+            cell.classList.remove("border-red-600");
+            cell.classList.remove("border-4");
+        }
+    };
+    function addTheBorderInput(cell: any, type: any){
+        if (type === 0) {
+            cell.classList.add("dark:focus:border-teal-700");
+            cell.classList.add("dark:focus:border-4");
+            cell.classList.add("dark:border-teal-700");
+            cell.classList.add("dark:border-4");
+            cell.classList.add("focus:border-[var(--background-components)]");
+            cell.classList.add("focus:border-4");
+            cell.classList.add("border-[var(--background-components)]");
+            cell.classList.add("border-4");
+        } else {
+            toggleErrors();
+            cell.classList.add("border-red-600");
+            cell.classList.add("border-4");
         }
     };
 
-    useEffect(() => {
-        openGame();
-        //console.log(getCookie("game"));
-    }, []);
 
-    function getCookie(name: any) {
-        debugger
-        var x,
-            y,
-            pair = document.cookie?.split("; ");
-        // Cookies seperated by ;   Key->value seperated by =
-        for (var i = 0; pair[i]?.split("="); i++)
-            x = pair[i].substring(0, pair[i].indexOf("="));
-        y = pair[i].substring(pair[i].indexOf("=") + 1);
-        x = x?.replace(/^\s+|\s+$/g, "");
-        if (x == name) {
-            console.log(decodeURI(y));
-            return decodeURI(y);
-        }
-    }
-
-    const insertNumber = (num: any) => {
+    function insertNumber(num: any){
         if (isSelectedCell) {
             // Make changes on input cell without using interaction of keyboard user - readOnly
-            if (
-                num === globalThis.selectedCell?.num &&
-                globalThis.selectedCell.num !== null
-            )
+            if (num === globalThis.selectedCell?.num && globalThis.selectedCell.num !== null)
                 num = -1;
             handler(
                 globalThis.selectedCell.e,
@@ -249,48 +240,79 @@ const GamePage = () => {
             );
         }
     };
+    function pad(val: any){
+        return val > 9 ? val : "0" + val;
+      };
+    function getTime(secs: number){
 
-    // Methods to change the border of inputs cells
-    const clearTheBorderInput = (cell: any, type: any) => {
-        if (type === 0) {
-            cell.classList.remove("dark:focus:border-teal-700");
-            cell.classList.remove("dark:focus:border-4");
-            cell.classList.remove("focus:border-slate-500");
-            cell.classList.remove("focus:border-4");
-        } else if (type === 1) {
-            cell.classList.remove("border-red-600");
-            cell.classList.remove("border-4");
+        var time: number = secs;
+      
+        interval = setInterval(function () {
+            
+            const hours = pad(parseInt((time / 3600).toString(), 10));
+            const minutes = pad(parseInt((time / 60).toString(), 10) % 60);
+            const seconds = pad(++time % 60);
+        
+            const array = [hours, minutes, seconds];
+
+            setTimeArray(array);
+            setSeconds(time);
+
+        }, 1000);
+    };
+    function openGame(){
+
+        const savedGameJsonString = cookie.getCookie('game');
+
+        if (savedGameJsonString?.length !== 0) {
+            const savedGame = JSON.parse(savedGameJsonString);
+            setSudokuAnswer(savedGame?.answer);
+            setInitialSudoku(savedGame?.original);
+            setSudokuSolution(savedGame?.solution);
+            getTime(savedGame?.time);
+            setErrors(savedGame?.errors);
         } else {
-            cell.classList.remove("dark:focus:border-teal-700");
-            cell.classList.remove("dark:focus:border-4");
-            cell.classList.remove("focus:border-slate-500");
-            cell.classList.remove("focus:border-4");
-            cell.classList.remove("border-red-600");
-            cell.classList.remove("border-4");
+            getTime(seconds);
         }
     };
 
-    const addTheBorderInput = (cell: any, type: any) => {
-        if (type === 0) {
-            cell.classList.add("dark:focus:border-teal-700");
-            cell.classList.add("dark:focus:border-4");
-            cell.classList.add("focus:border-slate-500");
-            cell.classList.add("focus:border-4");
-        } else {
-            cell.classList.add("border-red-600");
-            cell.classList.add("border-4");
-        }
+
+    function redirectToHomePage(){
+        saveGameCookie();
+        navigate("/");
     };
+    function redirectToPausePage(){
+        saveGameCookie();
+        navigate('/game-page/pause');
+    };
+
+
+    useEffect(() => {
+        if (seconds !== -1 && sudokuAnswer !== initialSudoku) {
+            saveGameCookie();
+        }
+    }, [seconds, sudokuAnswer, errors]);
+
+    useEffect(() => {
+        if (errors === 3) {
+            const finish = 'lost';
+            navigate(`/game-page/${finish}`);
+        }
+    }, [errors]);
+
+    useEffect(() => {
+        openGame();
+    }, []);
+
 
     return (
-        <div className="flex flex-col w-full p-7 dark:bg-[var(--dark-background)] justify-between items-center">
-            <div className="lg:w-96 ">
+            <div className="lg:w-full lg:h-full lg:p-7 gap-4 flex flex-col pt-10">
                 <div className="flex flex-row justify-between dark:text-teal-700">
                     <button onClick={() => redirectToHomePage()}>
                         <MdOutlineArrowBackIos size={25} />
                     </button>
 
-                    <h1 className="text-xl font-semibold dark:text-white">Sudoku.lena</h1>
+                    <h1 className="text-xl lg:text-4xl font-semibold dark:text-white">Sudoku.lena</h1>
                     <div className="flex flex-row gap-5 dark:text-teal-700">
                         <BsPalette
                             size={25}
@@ -302,31 +324,42 @@ const GamePage = () => {
                     </div>
                     <div
                         className={`${showMenuTheme ? "flex" : "hidden"
-                            } fixed top-16 right-7`}
+                            } fixed top-20 lg:top-8 right-7`}
                     >
                         <NavbarTheme onGameScene={true} />
                     </div>
                 </div>
 
                 <div className="flex flex-row justify-between pt-10 dark:text-white">
-                    <p>{CONSTANT.LEVEL_NAME[index_level]}</p>
+                    <p>{CONSTANT_GAME.LEVEL_NAME[index_level]}</p>
                     <div className="flex flex-row gap-2">
                         <p>Erros:</p>
                         <div className="flex flex-row">
-                            <p>0</p>
+                            <p>{errors}</p>
                             <p>/</p>
                             <p>3</p>
                         </div>
                     </div>
-                    <div>
-                        <span>{timeArray[0]}:</span>
-                        <span>{timeArray[1]}:</span>
-                        <span>{timeArray[2]}</span>
+                    <div className="flex flex-row items-center gap-2">
+                        <BiPauseCircle onClick={() => { redirectToPausePage(); }} size={20} />
+                        {timeArray.length !== 0 ?
+                            <div>
+                                <span>{timeArray[0]}:</span>
+                                <span>{timeArray[1]}:</span>
+                                <span>{timeArray[2]}</span>
+                            </div>
+                            :
+                            <div>
+                                <span>00:</span>
+                                <span>00:</span>
+                                <span>00</span>
+                            </div>
+                        }
                     </div>
                 </div>
 
                 <div className="flex items-center justify-center w-full py-2">
-                    <table className="border-collapse border-[#f0c98b] dark:border-teal-700 border-4 w-full">
+                    <table className="border-collapse border-[#f0c98b] dark:border-teal-700 border-4">
                         <tbody id="tbody">
                             {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((row) => {
                                 return (
@@ -348,10 +381,7 @@ const GamePage = () => {
                                                         id="input"
                                                         type="number"
                                                         className={`h-8 
-                                                    //dark:focus:border-teal-700 
-                                                    //dark:focus:border-4
-                                                    //focus:border-slate-500
-                                                    //focus:border-4
+                                                    cursor-pointer
                                                     w-8 
                                                     flex 
                                                     text-center
@@ -407,9 +437,7 @@ const GamePage = () => {
                     </div>
                     <div
                         className="flex flex-col items-center dark:text-white"
-                        onClick={() => {
-                            insertNumber(-1);
-                        }}
+                        onClick={() => insertNumber(-1)}
                     >
                         <TfiEraser className="" size={25} />
                         <p>Apagar</p>
@@ -423,8 +451,8 @@ const GamePage = () => {
                         <p>Desfazer</p>
                     </div> */}
                 </div>
-                <div className="flex flex-row justify-between text-3xl font-semibold pt-5 dark:text-teal-700">
-                    {CONSTANT.NUMBERS.map((num: any) => (
+                <div className="flex flex-row justify-between text-3xl font-semibold pt-5 dark:text-teal-700 cursor-pointer">
+                    {CONSTANT_GAME.NUMBERS.map((num: any) => (
                         <p
                             key={num}
                             onClick={() => {
@@ -436,7 +464,6 @@ const GamePage = () => {
                     ))}
                 </div>
             </div>
-        </div>
     );
 };
 

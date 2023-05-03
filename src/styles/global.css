@@ -3,6 +3,10 @@
 @tailwind utilities;
 
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+/* *{
+  border: 1px solid red;
+  
+} */
 
 :root{
     --dark-background: #2C3333;
@@ -26,7 +30,7 @@
   }
 
 body{
-    @apply dark:bg-[var(--dark-background)] bg-[var(--background)] h-full w-full;
+    @apply dark:bg-[var(--dark-background)] bg-[var(--background)] h-full w-full flex justify-center;
 }
 
 html{

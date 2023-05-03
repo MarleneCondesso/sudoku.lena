@@ -1,46 +1,41 @@
 import { MdOutlineArrowBackIos } from "react-icons/md";
-import { useNavigate } from "react-router-dom";
-import { useCallback, useEffect, useState } from "react";
-import { CONSTANT } from "./HomePage";
+import { useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
 import NavbarTheme from "../components/NavbarTheme";
-import { BsPalette } from "react-icons/bs";
-import { Game } from "./GamePage";
+import { Cookie } from "../libs/Cookie";
+import { useNavigate } from "react-router-dom";
+import { TimeFormatter } from "../libs/TimeFormatter";
+import { CONSTANT_GAME } from "../libs/Modules";
+import CardGameInformation from "../components/CardGameInformation";
+
 const FinishGamePage = () => {
 
-
+  const cookie = new Cookie();
   const navigate = useNavigate();
+  const formatter = new TimeFormatter();
 
-  const information = globalThis.game;
+  let params = useParams();
+  let finishType = params?.finish?.toString() || "";
+
+  const cookieObject = cookie.getCookie('game');
   const [time, setTime] = useState<Array<number>>([]);
-  const formatSeconds = (time: any) => {
-    function pad(val: any) {
-      return val > 9 ? val : "0" + val;
-    }
-    var hours = pad(parseInt((time / 3600).toString(), 10));
-    var minutes = pad(parseInt((time / 60).toString(), 10) % 60);
-    var seconds = pad(++time % 60);
 
-    var array = [hours, minutes, seconds];
-
-    setTime(array);
-  };
+  let level = 0;
 
   const redirectToHomePage = () => {
-    var clearGame: Game = {
-      level: '',
-      solution: '',
-      sudoku: '',
-      sudokuOrigin: '',
-      time: ''
-    };
-    globalThis.game = clearGame;
+    cookie.deleteCookie();
     navigate('/');
   }
 
   useEffect(() => {
-    if (information?.time) formatSeconds(information.time);
-  });
+    if (cookieObject?.length === 0) { return; }
 
+    const cookieObjectParse = JSON.parse(cookieObject);
+
+    level = cookieObjectParse.level;
+    setTime(formatter.formatSeconds(cookieObjectParse?.time));
+
+  }, []);
 
 
   return (
@@ -57,30 +52,10 @@ const FinishGamePage = () => {
         </div>
       </div>
       <div className="flex flex-col items-center gap-10 ">
-        <h2 className="text-4xl font-bold dark:text-white text-[color:var(--text-color)]">Parabéns</h2>
-        <h2 className="text-4xl font-bold dark:text-white text-[color:var(--text-color)] ">Concluiu o Sudoku</h2>
+        <h2 className="text-4xl font-bold dark:text-white text-[color:var(--text-color)]">{finishType === 'win' ? 'Parabéns' : 'Perdeu'}</h2>
+        <h2 className="text-4xl font-bold dark:text-white text-[color:var(--text-color)] ">{finishType === 'win' && 'Concluiu o Sudoku'} </h2>
       </div>
-      <div className="dark:bg-[var(--dark-background-components)] bg-[var(--background-components)] shadow-2xl shadow-orange-300 dark:shadow-emerald-800 w-60 h-60 rounded-xl items-center flex-col flex text-center justify-center gap-10">
-        <div className="flex flex-row gap-10 justify-between w-full px-10">
-          <h2 className="h-full text-2xl text-[color:var(--text-color-light)] dark:text-[color:(--dark-text-color)] font-semibold ">
-            Nível
-          </h2>
-          <p className=" text-center text-lg text-[color:var(--text-color)] dark:text-[color:var(--dark-text-color)] font-semibold">
-            {CONSTANT.LEVEL_NAME[information?.level]}
-          </p>
-        </div>
-
-        <div className="flex flex-row gap-10 justify-between w-full px-10">
-          <h2 className="text-start h-full text-2xl text-[color:var(--text-color-light)] dark:text-[color:(--dark-text-color)] font-semibold">
-            Tempo
-          </h2>
-          <div className="text-lg font-semibold text-[color:var(--text-color)] dark:text-[color:var(--dark-text-color)]">
-            <span>{time[0] === parseInt('00') ? time[0]+':' : ''}</span>
-            <span>{time[1]}:</span>
-            <span>{time[2]}</span>
-          </div>
-        </div>
-      </div>
+      <CardGameInformation level={level} time={time} situation="end"/>
     </div>
   );
 };
