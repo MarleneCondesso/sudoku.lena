@@ -7,7 +7,7 @@ import FinishGamePage from './pages/FinishGamePage';
 import PauseGamePage from './pages/PauseGamePage';
 function App() {
   return (
-    <div className='flex flex-col w-full'>
+    <div className='flex flex-col h-[100vh] items-center justify-around'>
       <Routes>
         <Route path="/" element={<HomePage/>}/>
         <Route path="/game-page/:level/:type" element={<GamePage/>}/>

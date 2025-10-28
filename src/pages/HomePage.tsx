@@ -1,6 +1,4 @@
 import Navbar from "../components/Navbar";
-import Card from "../components/Card";
-import NavbarFooter from "../components/NavbarFooter";
 import NavbarLevels from "../components/NavbarLevels";
 import { useCallback, useEffect, useState } from "react";
 import { Cookie } from "../libs/Cookie";
@@ -28,16 +26,15 @@ function HomePage() {
     if (savedGameJsonString?.length === 0) { return; }
     const savedGame = JSON.parse(savedGameJsonString);
 
-    return navigate(`/game-page/${savedGame?.level}/${1}`);
+    return navigate(`/game-page/${savedGame?.level}/${0}`);
   };
 
   useEffect(() => {
     if (!cookie.getCookie('game')) setDisableBtnContinue(true);
-    
   }, []);
 
   return (
-    <div className="flex flex-col h-full w-full p-10 items-center">
+    <div className="flex flex-col h-full w-max p-10 items-center">
       <Navbar />
       <div className="flex flex-col w-full items-center justify-center pt-10">
         {/* <div className='grid grid-cols-1 gap-5 items-center justify-center'>
@@ -47,12 +44,12 @@ function HomePage() {
           <h2>Sudoku.lena</h2>
         </div>
         <div className="flex flex-col gap-5 w-full text-[color:var(--text-color-light)]">
-          <button disabled={disableBtnContinue} onClick={() => openLastGame()} className="disabled:opacity-70 shadow-sm dark:shadow-emerald-800 shadow-orange-300 h-12 w-full dark:bg-[var(--dark-background-components)] bg-[var(--background-components)] rounded-full">
-            Continuar o jogo
+          <button disabled={disableBtnContinue} onClick={() => openLastGame()} className="disabled:opacity-70 shadow-sm dark:shadow-emerald-800 shadow-orange-300 h-12 w-full dark:bg-[var(--dark-background-components)] bg-[var(--background-components)] rounded-full hover:opacity-80">
+            Continue
           </button>
-          <button onClick={() => { toggleShowLevels(); cookie.deleteCookie(); }} className="shadow-sm dark:shadow-emerald-800 shadow-orange-300 h-12 w-full dark:bg-[var(--dark-background-components)] bg-[var(--background-components)] rounded-full"
+          <button onClick={() => { toggleShowLevels(); cookie.deleteCookie(); }} className="shadow-sm dark:shadow-emerald-800 shadow-orange-300 h-12 w-full dark:bg-[var(--dark-background-components)] bg-[var(--background-components)] rounded-full hover:opacity-80"
           >
-            Novo jogo
+            New game
           </button>
         </div>
         <div id="navbar-levels" className={`${showMenuLevels ? "translate-y-0" : "translate-y-96"} bottom-0 fixed z-[1]`} >

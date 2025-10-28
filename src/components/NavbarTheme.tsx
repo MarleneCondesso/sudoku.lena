@@ -46,27 +46,28 @@ const NavbarTheme: FC<NavbarThemeProps> = ({onGameScene}) => {
         <div>
             <div className={`
                 flex
-                
                 ${!onGameScene ? 'fixed' : ''}
                 right-3
-                float-right
                 bg-gray-400
                 opacity-60
                 top-5
-                p-2
+                h-8
+                px-1
                 dark:bg-teal-800
                 dark:bg-opacity-60
                 rounded-xl
                 duration-300
+                items-center
+                justify-center
                 gap-4`}
             >
                 <button onClick={() => { setTheme('light'); }}
                     className={`
                         ${theme === 'light' ? 'text-[#DDD0C8]' : 'text-white'}
-                        cursor-pointer
+                        cursor-pointer 
                     `}
                 >
-                    <BsFillSunFill size={20} />
+                    <BsFillSunFill />
                 </button>
                 <button onClick={() => { setTheme('dark'); }}
                     className={`
@@ -74,15 +75,15 @@ const NavbarTheme: FC<NavbarThemeProps> = ({onGameScene}) => {
                         cursor-pointer
                     `}
                 >
-                    <BsFillMoonFill size={18} />
+                    <BsFillMoonFill />
                 </button>
                 <button onClick={() => { setTheme('system'); }}
                     className={`
                             ${theme === 'dark' ? 'text-[color:var(--dark-text-color)]' : 'text-white'}
-                             cursor-pointer  
+                             cursor-pointer
                         `}
                 >
-                    <MdDesktopWindows size={20} />
+                    <MdDesktopWindows />
                 </button>
             </div>
         </div>

@@ -30,7 +30,7 @@
   }
 
 body{
-    @apply dark:bg-[var(--dark-background)] bg-[var(--background)] h-full w-full flex justify-center;
+    @apply dark:bg-[var(--dark-background)] bg-[var(--background)] h-full w-full justify-center;
 }
 
 html{

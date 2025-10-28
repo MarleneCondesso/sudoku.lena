@@ -19,8 +19,8 @@ const FinishGamePage = () => {
 
   const cookieObject = cookie.getCookie('game');
   const [time, setTime] = useState<Array<number>>([]);
+  const [level, setLevel ] = useState(JSON.parse(cookieObject)?.level);
 
-  let level = 0;
 
   const redirectToHomePage = () => {
     cookie.deleteCookie();
@@ -32,14 +32,14 @@ const FinishGamePage = () => {
 
     const cookieObjectParse = JSON.parse(cookieObject);
 
-    level = cookieObjectParse.level;
+    //level = cookieObjectParse.level;
     setTime(formatter.formatSeconds(cookieObjectParse?.time));
 
   }, []);
 
 
   return (
-    <div className="flex flex-col gap-28 p-7 h-[100vh] w-full items-center dark:bg-[var(--dark-background)]">
+    <div className="flex flex-col gap-10 p-7 h-[100vh] w-full items-center dark:bg-[var(--dark-background)]">
       <div className="grid grid-cols-3 justify-between items-center w-full">
         <button className="dark:text-white text-black" onClick={() => redirectToHomePage()}>
           <MdOutlineArrowBackIos size={25} />
@@ -52,8 +52,7 @@ const FinishGamePage = () => {
         </div>
       </div>
       <div className="flex flex-col items-center gap-10 ">
-        <h2 className="text-4xl font-bold dark:text-white text-[color:var(--text-color)]">{finishType === 'win' ? 'Parabéns' : 'Perdeu'}</h2>
-        <h2 className="text-4xl font-bold dark:text-white text-[color:var(--text-color)] ">{finishType === 'win' && 'Concluiu o Sudoku'} </h2>
+        <h2 className="text-xl font-bold dark:text-white text-[color:var(--text-color)]">{finishType === 'win' ? 'Congratulation' : 'Lost the game'}</h2>
       </div>
       <CardGameInformation level={level} time={time} situation="end"/>
     </div>
