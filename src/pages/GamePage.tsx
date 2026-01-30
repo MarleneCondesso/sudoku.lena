@@ -1,6 +1,6 @@
 import { MdOutlineArrowBackIos } from "react-icons/md";
 import { BiPauseCircle } from 'react-icons/bi';
-import { useEffect, useRef, useState, useCallback, useMemo } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { SudokuGenerate } from "../libs/SudokuGenerate";
 import { useParams, useNavigate } from "react-router-dom";
 import NavbarTheme from "../components/NavbarTheme";
@@ -139,7 +139,7 @@ const GamePage = React.memo(() => {
      * Increments time every second and updates timeArray for display (HH:MM:SS format).
      * @param start - The starting time in seconds.
      */
-    function startTimer(start: number) {
+    const startTimer = useCallback((start: number) => {
         let time = start;
         setInterval(() => {
             time++;
@@ -150,12 +150,13 @@ const GamePage = React.memo(() => {
                 Number(pad(time % 60))
             ]);
         }, 1000);
-    }
+    }, []);
 
     /**
      * Loads a saved game from cookies if available and not restarting.
      * If saved game exists, restores answer, original, timer, and errors; otherwise starts new timer at 0.
      */
+    // eslint-disable-next-line
     const openGame = useCallback(() => {
         const saved = cookie.getCookie("game");
         if (saved && restartGame !== 1) {
@@ -167,7 +168,7 @@ const GamePage = React.memo(() => {
         } else {
             startTimer(0);
         }
-    }, [cookie, restartGame]);
+    }, [cookie, restartGame, startTimer]);
 
     /**
      * Saves the current game state to cookies.
