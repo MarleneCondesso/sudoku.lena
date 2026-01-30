@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import NavbarTheme from "../components/NavbarTheme";
 import { useNavigate } from "react-router-dom";
 import { Cookie } from "../libs/Cookie";
@@ -12,9 +12,9 @@ import CardGameInformation from "../components/CardGameInformation";
  * Shows current game stats and provides options to continue, restart, or go home.
  */
 const PauseGamePage = () => {
-  const cookie = new Cookie();
+  const cookie = useMemo(() => new Cookie(), []);
   const navigate = useNavigate();
-  const formatter = new TimeFormatter();
+  const formatter = useMemo(() => new TimeFormatter(), []);
 
   const cookieObject = cookie.getCookie('game');
 
@@ -39,7 +39,7 @@ const PauseGamePage = () => {
     } catch (error) {
       console.error("Invalid game cookie", error);
     }
-  }, []);
+  }, [cookieObject, formatter]);
 
 
   return (

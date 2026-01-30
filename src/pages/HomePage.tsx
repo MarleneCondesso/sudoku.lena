@@ -1,6 +1,6 @@
 import Navbar from "../components/Navbar";
 import NavbarLevels from "../components/NavbarLevels";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useMemo } from "react";
 import { Cookie } from "../libs/Cookie";
 import { useNavigate } from "react-router-dom";
 
@@ -9,7 +9,7 @@ import { useNavigate } from "react-router-dom";
  * It displays the app title, continue and new game buttons, and handles navigation to saved or new games.
  */
 function HomePage() {
-  const cookie = new Cookie();
+  const cookie = useMemo(() => new Cookie(), []);
   const navigate = useNavigate();
 
   const [showMenuLevels, setShowMenuLevels] = useState(false);
@@ -43,7 +43,7 @@ function HomePage() {
    */
   useEffect(() => {
     if (!cookie.getCookie('game')) setDisableBtnContinue(true);
-  }, []);
+  }, [cookie]);
 
   return (
     <div className="flex flex-col h-full w-max p-10 items-center">

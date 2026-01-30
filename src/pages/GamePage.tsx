@@ -1,7 +1,6 @@
 import { MdOutlineArrowBackIos } from "react-icons/md";
-import { BsPalette } from "react-icons/bs";
 import { BiPauseCircle } from 'react-icons/bi';
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { SudokuGenerate } from "../libs/SudokuGenerate";
 import { useParams, useNavigate } from "react-router-dom";
 import NavbarTheme from "../components/NavbarTheme";
@@ -24,19 +23,18 @@ export interface SelectedCell {
  * Uses React.memo for performance optimization.
  */
 const GamePage = React.memo(() => {
-    const [theme, setTheme] = useState<'dark' | 'light'>(() => {
-        const savedTheme = localStorage.getItem('theme');
-        return savedTheme === 'light' ? 'light' : 'dark';
-    });
-
     /**
      * useEffect hook to listen for theme changes in localStorage.
-     * Updates the theme state when storage changes (e.g., from another tab).
+     * Updates the document class when storage changes (e.g., from another tab).
      */
     useEffect(() => {
         const handleStorageChange = () => {
             const savedTheme = localStorage.getItem('theme');
-            setTheme(savedTheme === 'light' ? 'light' : 'dark');
+            if (savedTheme === 'dark') {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
         };
 
         window.addEventListener('storage', handleStorageChange);
@@ -158,7 +156,7 @@ const GamePage = React.memo(() => {
      * Loads a saved game from cookies if available and not restarting.
      * If saved game exists, restores answer, original, timer, and errors; otherwise starts new timer at 0.
      */
-    function openGame() {
+    const openGame = useCallback(() => {
         const saved = cookie.getCookie("game");
         if (saved && restartGame !== 1) {
             const game = JSON.parse(saved);
@@ -169,7 +167,7 @@ const GamePage = React.memo(() => {
         } else {
             startTimer(0);
         }
-    }
+    }, [cookie, restartGame]);
 
     /**
      * Saves the current game state to cookies.
@@ -178,11 +176,11 @@ const GamePage = React.memo(() => {
      * @param timeValue - The current time in seconds (defaults to seconds).
      * @param errorValue - The current error count (defaults to errors).
      */
-    function saveGameCookie(
+    const saveGameCookie = useCallback((
         answer = sudokuAnswer,
         timeValue = seconds,
         errorValue = errors
-    ) {
+    ) => {
         const game = {
             level: initialLevelRef.current,
             solution: sudokuSolution,
@@ -193,7 +191,7 @@ const GamePage = React.memo(() => {
         };
 
         cookie.setCookie("game", JSON.stringify(game), 7);
-    }
+    }, [cookie, sudokuAnswer, seconds, errors, sudokuSolution, initialSudoku]);
 
     /**
      * useEffect hook that saves the game whenever answer, seconds, or errors change.
@@ -203,14 +201,14 @@ const GamePage = React.memo(() => {
         if (seconds >= 0) {
             saveGameCookie();
         }
-    }, [sudokuAnswer, seconds, errors]);
+    }, [sudokuAnswer, seconds, errors, saveGameCookie]);
 
     /**
      * useEffect hook that loads the game on component mount.
      */
     useEffect(() => {
         openGame();
-    }, []);
+    }, [openGame]);
 
     /**
      * useEffect hook that navigates to lose page if errors reach 3.
@@ -219,7 +217,7 @@ const GamePage = React.memo(() => {
         if (errors === 3) {
             navigate("/game-page/lost");
         }
-    }, [errors]);
+    }, [errors, navigate]);
 
     /**
      * useEffect hook that focuses the selected cell's input element.
