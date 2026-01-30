@@ -11,6 +11,11 @@ interface TableProps {
     cellErrors: boolean[][]; // <-- adicionar esta linha
 }
 
+/**
+ * Table component renders the 9x9 Sudoku grid.
+ * Handles cell inputs, displays pen guesses, highlights errors and selected cells.
+ * Supports both normal input mode and pen mode for noting possible numbers.
+ */
 const Table: FC<TableProps> = ({
     sudokuInitial,
     sudokuAnswer,

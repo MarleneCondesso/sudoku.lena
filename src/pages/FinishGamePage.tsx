@@ -8,8 +8,11 @@ import { TimeFormatter } from "../libs/TimeFormatter";
 import { CONSTANT_GAME } from "../libs/Modules";
 import CardGameInformation from "../components/CardGameInformation";
 
+/**
+ * FinishGamePage component displays the game over screen after winning or losing.
+ * Shows congratulations or loss message, game stats, and allows navigation back to home.
+ */
 const FinishGamePage = () => {
-
   const cookie = new Cookie();
   const navigate = useNavigate();
   const formatter = new TimeFormatter();
@@ -21,12 +24,20 @@ const FinishGamePage = () => {
   const [level, setLevel] = useState<number>(0);
   const [time, setTime] = useState<Array<number>>([]);
 
-
+  /**
+   * Redirects to the home page and deletes the saved game cookie.
+   * Used when the user wants to start a new game or return to menu.
+   */
   const redirectToHomePage = () => {
     cookie.deleteCookie();
     navigate('/');
   }
 
+  /**
+   * useEffect hook that loads game data from cookies on component mount.
+   * Parses the saved game to extract level and time, formatting time into [hours, minutes, seconds].
+   * Handles invalid cookie data by logging an error.
+   */
   useEffect(() => {
     if (!cookieObject) return;
 

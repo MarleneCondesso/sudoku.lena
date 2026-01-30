@@ -7,9 +7,11 @@ import CardGameInformation from "../components/CardGameInformation";
 
 
 
+/**
+ * PauseGamePage component displays the pause screen during a game.
+ * Shows current game stats and provides options to continue, restart, or go home.
+ */
 const PauseGamePage = () => {
-
-
   const cookie = new Cookie();
   const navigate = useNavigate();
   const formatter = new TimeFormatter();
@@ -19,6 +21,11 @@ const PauseGamePage = () => {
   const [time, setTime] = useState<Array<number>>([]);
   const [level, setLevel] = useState();
 
+  /**
+   * useEffect hook that loads paused game data from cookies on component mount.
+   * Parses the saved game to extract level and time, formatting time into [hours, minutes, seconds].
+   * Handles invalid cookie data by logging an error.
+   */
   useEffect(() => {
     if (!cookieObject) return;
 

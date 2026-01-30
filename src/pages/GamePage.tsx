@@ -17,13 +17,22 @@ export interface SelectedCell {
     num: number | null;
     cell: any; // obrigatório
 }
-const GamePage = React.memo(() => {
 
+/**
+ * GamePage component renders the main Sudoku game interface.
+ * It manages game state, timer, errors, and user interactions for playing Sudoku.
+ * Uses React.memo for performance optimization.
+ */
+const GamePage = React.memo(() => {
     const [theme, setTheme] = useState<'dark' | 'light'>(() => {
         const savedTheme = localStorage.getItem('theme');
         return savedTheme === 'light' ? 'light' : 'dark';
     });
 
+    /**
+     * useEffect hook to listen for theme changes in localStorage.
+     * Updates the theme state when storage changes (e.g., from another tab).
+     */
     useEffect(() => {
         const handleStorageChange = () => {
             const savedTheme = localStorage.getItem('theme');
@@ -67,8 +76,16 @@ const GamePage = React.memo(() => {
         Array.from({ length: 9 }, () => Array.from({ length: 9 }, () => []))
     );
 
-
-
+    /**
+     * Handles user input for a Sudoku cell.
+     * Determines the value to insert, updates the answer grid, checks for errors, and increments error count if incorrect.
+     * Prevents duplicate calls by checking if the value hasn't changed.
+     * Logic example: If user enters 5 in cell (0,0) but solution has 3, marks cell as error and increments errors to 1.
+     * @param e - The event object (optional, for input changes).
+     * @param row - The row index of the cell.
+     * @param col - The column index of the cell.
+     * @param num - The number to insert (or -1 to clear).
+     */
     function handler(e: any, row: number, col: number, num: number) {
         const value =
             num >= 1 || num === -1
@@ -107,14 +124,23 @@ const GamePage = React.memo(() => {
         if (hasErrorNow) {
             setErrors(e => e + 1);
         }
-
     }
 
-
+    /**
+     * Pads a number with a leading zero if it's less than 10.
+     * Used for formatting time display (e.g., 5 becomes "05").
+     * @param val - The number to pad.
+     * @returns The padded string.
+     */
     function pad(val: number) {
         return val > 9 ? val : "0" + val;
     }
 
+    /**
+     * Starts the game timer from a given start time.
+     * Increments time every second and updates timeArray for display (HH:MM:SS format).
+     * @param start - The starting time in seconds.
+     */
     function startTimer(start: number) {
         let time = start;
         setInterval(() => {
@@ -128,6 +154,10 @@ const GamePage = React.memo(() => {
         }, 1000);
     }
 
+    /**
+     * Loads a saved game from cookies if available and not restarting.
+     * If saved game exists, restores answer, original, timer, and errors; otherwise starts new timer at 0.
+     */
     function openGame() {
         const saved = cookie.getCookie("game");
         if (saved && restartGame !== 1) {
@@ -141,6 +171,13 @@ const GamePage = React.memo(() => {
         }
     }
 
+    /**
+     * Saves the current game state to cookies.
+     * Stores level, solution, original puzzle, current answer, time, and errors for 7 days.
+     * @param answer - The current answer grid (defaults to sudokuAnswer).
+     * @param timeValue - The current time in seconds (defaults to seconds).
+     * @param errorValue - The current error count (defaults to errors).
+     */
     function saveGameCookie(
         answer = sudokuAnswer,
         timeValue = seconds,
@@ -158,23 +195,35 @@ const GamePage = React.memo(() => {
         cookie.setCookie("game", JSON.stringify(game), 7);
     }
 
+    /**
+     * useEffect hook that saves the game whenever answer, seconds, or errors change.
+     * Only saves if seconds >= 0 (timer started).
+     */
     useEffect(() => {
         if (seconds >= 0) {
             saveGameCookie();
         }
     }, [sudokuAnswer, seconds, errors]);
 
-
+    /**
+     * useEffect hook that loads the game on component mount.
+     */
     useEffect(() => {
         openGame();
     }, []);
 
+    /**
+     * useEffect hook that navigates to lose page if errors reach 3.
+     */
     useEffect(() => {
         if (errors === 3) {
             navigate("/game-page/lost");
         }
     }, [errors]);
 
+    /**
+     * useEffect hook that focuses the selected cell's input element.
+     */
     useEffect(() => {
         if (selectedCell?.cell) {
             selectedCell.cell.focus();

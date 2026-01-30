@@ -11,6 +11,11 @@ interface CardGameInformationProps {
 }
 
 
+/**
+ * CardGameInformation component displays game statistics and action buttons.
+ * Shows level, time, and provides buttons based on the situation (pause or end).
+ * Buttons include continue, restart, and home page navigation.
+ */
 const CardGameInformation: FC<CardGameInformationProps> = ({ level, time, situation, onContinue, onHomePage, onRestartGame }) => {
 
     return (

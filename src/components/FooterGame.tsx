@@ -29,6 +29,11 @@ const FooterGame: FC<FooterGameProps> = React.memo(({
 
     const [penActive, setPenActive] = useState(false);
 
+    /**
+     * Toggles between normal input mode and pen mode.
+     * Pen mode allows noting possible numbers in cells without committing to a final answer.
+     * Uses useCallback to prevent unnecessary re-renders.
+     */
     const changeMode = useCallback(() => {
         setPenActive(current => {
             setPenMode(!current);
@@ -36,6 +41,10 @@ const FooterGame: FC<FooterGameProps> = React.memo(({
         });
     }, [setPenMode]);
 
+    /**
+     * Clears all user inputs from the Sudoku grid, resetting to the initial puzzle state.
+     * Also clears any visual border indicators on input elements.
+     */
     function clear() {
         clearSudoku();
         const inputs = document.getElementsByTagName("input");
@@ -44,6 +53,12 @@ const FooterGame: FC<FooterGameProps> = React.memo(({
         }
     }
 
+    /**
+     * Inserts a number into the currently selected cell.
+     * If the same number is already in the cell, it clears the cell instead (toggle behavior).
+     * Only works if a cell is selected and it's a valid cell for input.
+     * @param num - The number to insert (1-9) or -1 to clear.
+     */
     function insertNumber(num: number) {
         if (!selectedCell || !isSelectedCell) return;
 
@@ -53,6 +68,14 @@ const FooterGame: FC<FooterGameProps> = React.memo(({
         handler(selectedCell.cell, selectedCell.row, selectedCell.col, numberToInsert);
     }
 
+    /**
+     * Handles pen mode input by toggling a guess number in the penGuesses array.
+     * If the guess is not present, adds it; if present, removes it.
+     * Keeps guesses sorted for consistent display.
+     * @param row - Row index of the cell.
+     * @param col - Column index of the cell.
+     * @param guess - The number to toggle as a guess (1-9).
+     */
     function handlePenInput(row: number, col: number, guess: number) {
         const newGuesses = penGuesses.map((rowGuesses, r) =>
             r === row
