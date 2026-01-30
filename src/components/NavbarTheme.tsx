@@ -9,7 +9,6 @@ interface NavbarThemeProps{
 const NavbarTheme: FC<NavbarThemeProps> = ({onGameScene}) => {
 
 
-
     const [theme, setTheme] = useState(typeof window !== 'undefined' && localStorage.getItem('theme') ? localStorage.getItem('theme') : 'system');
 
     const onWindowMatch = () => {
@@ -63,7 +62,7 @@ const NavbarTheme: FC<NavbarThemeProps> = ({onGameScene}) => {
             >
                 <button onClick={() => { setTheme('light'); }}
                     className={`
-                        ${theme === 'light' ? 'text-[#DDD0C8]' : 'text-white'}
+                        ${theme === 'light' ? 'text-black' : 'text-[#DDD0C8]'}
                         cursor-pointer 
                     `}
                 >
@@ -71,7 +70,7 @@ const NavbarTheme: FC<NavbarThemeProps> = ({onGameScene}) => {
                 </button>
                 <button onClick={() => { setTheme('dark'); }}
                     className={`
-                        ${theme === 'dark' ? 'text-[color:var(--dark-text-color)]' : 'text-white'}
+                        ${theme === 'dark' ? 'text-black' : 'text-white'}
                         cursor-pointer
                     `}
                 >
@@ -79,11 +78,11 @@ const NavbarTheme: FC<NavbarThemeProps> = ({onGameScene}) => {
                 </button>
                 <button onClick={() => { setTheme('system'); }}
                     className={`
-                            ${theme === 'dark' ? 'text-[color:var(--dark-text-color)]' : 'text-white'}
+                            ${theme === 'system' ? 'text-black' : 'text-white'}
                              cursor-pointer
                         `}
                 >
-                    <MdDesktopWindows />
+                    <MdDesktopWindows size={18}/>
                 </button>
             </div>
         </div>

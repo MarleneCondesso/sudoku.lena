@@ -20,23 +20,27 @@ const PauseGamePage = () => {
   const [level, setLevel] = useState();
 
   useEffect(() => {
-    if (cookieObject.length === 0) return;
+    if (!cookieObject) return;
 
-    const cookieObjectParse = JSON.parse(cookieObject);
+    try {
+      const parsed = JSON.parse(cookieObject);
+      setLevel(parsed.level);
 
-    setLevel(cookieObjectParse.level);
-    if (cookieObjectParse.time) setTime(formatter.formatSeconds(cookieObjectParse.time));
-
+      if (parsed.time) {
+        setTime(formatter.formatSeconds(parsed.time));
+      }
+    } catch (error) {
+      console.error("Invalid game cookie", error);
+    }
   }, []);
-
 
 
   return (
     <div className="flex flex-col gap-10 mt-20 w-full items-center justify-center dark:bg-[var(--dark-background)]">
       <div className=" w-full flex items-start">
-          <h1 className="text-xl text-center fixed top-6 right-0 left-0 font-semibold dark:text-white">
-            Sudoku.lena
-          </h1>
+        <h1 className="text-xl text-center fixed top-6 right-0 left-0 font-semibold dark:text-white">
+          Sudoku.lena
+        </h1>
         <div className="flex fixed top-20 right-7">
           <NavbarTheme onGameScene={false} />
         </div>
@@ -44,7 +48,7 @@ const PauseGamePage = () => {
       <div className="flex flex-col items-center gap-10 ">
         <h2 className="text-4xl font-bold dark:text-white text-[color:var(--text-color)]">Pause</h2>
       </div>
-      <CardGameInformation level={level!} situation="pause" time={time} onContinue={() => navigate(`/game-page/${level}/${0}`)} onHomePage={() => navigate('/')} onRestartGame={() => navigate(`/game-page/${level}/${1}`)}/>
+      <CardGameInformation level={level!} situation="pause" time={time} onContinue={() => navigate(`/game-page/${level}/${0}`)} onHomePage={() => navigate('/')} onRestartGame={() => navigate(`/game-page/${level}/${1}`)} />
     </div >
   );
 }

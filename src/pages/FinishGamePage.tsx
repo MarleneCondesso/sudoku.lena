@@ -18,8 +18,8 @@ const FinishGamePage = () => {
   let finishType = params?.finish?.toString() || "";
 
   const cookieObject = cookie.getCookie('game');
+  const [level, setLevel] = useState<number>(0);
   const [time, setTime] = useState<Array<number>>([]);
-  const [level, setLevel ] = useState(JSON.parse(cookieObject)?.level);
 
 
   const redirectToHomePage = () => {
@@ -28,13 +28,19 @@ const FinishGamePage = () => {
   }
 
   useEffect(() => {
-    if (cookieObject?.length === 0) { return; }
+    if (!cookieObject) return;
 
-    const cookieObjectParse = JSON.parse(cookieObject);
-
-    //level = cookieObjectParse.level;
-    setTime(formatter.formatSeconds(cookieObjectParse?.time));
-
+    try {
+      const parsed = JSON.parse(cookieObject);
+      if (typeof parsed.level === "number") {
+        setLevel(parsed.level);
+      } else {
+        setLevel(CONSTANT_GAME.LEVEL.indexOf(parsed.level));
+      }
+      setTime(formatter.formatSeconds(parsed.time));
+    } catch (error) {
+      console.error("Invalid game cookie", error);
+    }
   }, []);
 
 
@@ -54,7 +60,7 @@ const FinishGamePage = () => {
       <div className="flex flex-col items-center gap-10 ">
         <h2 className="text-xl font-bold dark:text-white text-[color:var(--text-color)]">{finishType === 'win' ? 'Congratulation' : 'Lost the game'}</h2>
       </div>
-      <CardGameInformation level={level} time={time} situation="end"/>
+      <CardGameInformation level={level} time={time} situation="end" />
     </div>
   );
 };
